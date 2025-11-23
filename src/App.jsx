@@ -166,7 +166,7 @@ export default function F1Calculator() {
       <header className="bg-slate-900 text-white p-3 shadow-lg sticky top-0 z-50">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {/* Trophy Icon - Changed to Gold */}
+            {/* Trophy Icon - Gold */}
             <div className="p-1.5 bg-yellow-500 rounded-lg">
               <Trophy className="w-5 h-5 text-white" />
             </div>
@@ -211,8 +211,8 @@ export default function F1Calculator() {
                     </th>
                   ))}
 
-                  {/* Total */}
-                  <th className="px-1 py-3 text-right w-[17%] font-bold text-slate-800">
+                  {/* Total - Added padding-right to move it left */}
+                  <th className="px-1 pr-4 py-3 text-right w-[17%] font-bold text-slate-800">
                     总分
                   </th>
                 </tr>
@@ -243,7 +243,7 @@ export default function F1Calculator() {
                               className="w-1 h-3 rounded-full shrink-0" 
                               style={{ backgroundColor: driver.color }}
                             />
-                            {/* Fixed: Removed truncate, used flex container for reliable layout */}
+                            {/* Flex container for name + crown */}
                             <div className="flex items-center gap-1 min-w-0">
                               <span className="font-bold text-slate-800 text-sm leading-none whitespace-nowrap">
                                 {driver.shortName}
@@ -252,7 +252,7 @@ export default function F1Calculator() {
                             </div>
                           </div>
 
-                          {/* Stats Row (Read Only Text) */}
+                          {/* Stats Row */}
                           <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
                             <span className="font-medium text-slate-600">{driver.points} 分</span>
                             <span className="text-slate-300">|</span>
@@ -269,26 +269,12 @@ export default function F1Calculator() {
                         let cellBg = '';
                         let textColor = 'text-slate-400';
                         
-                        // Updated Color Scheme: Harmonious, Pastel/Muted Tones
-                        if (selection === '1') { 
-                          // Soft Gold (Amber)
-                          cellBg = 'bg-amber-50 text-amber-700 font-bold border-amber-200'; 
-                        }
-                        else if (selection === '2') { 
-                          // Soft Silver (Slate)
-                          cellBg = 'bg-slate-50 text-slate-600 font-bold border-slate-200'; 
-                        }
-                        else if (selection === '3') { 
-                          // Soft Bronze (Orange/Stone mix style)
-                          cellBg = 'bg-orange-50 text-orange-700 font-bold border-orange-200'; 
-                        }
-                        else if (['DNF', 'DSQ', 'DNS'].includes(selection)) { 
-                          // Keep Red for DNF but soft
-                          cellBg = 'bg-red-50 text-red-500 border-red-100'; 
-                        }
-                        else if (selection) { 
-                          textColor = 'text-slate-900'; 
-                        }
+                        // Color Scheme
+                        if (selection === '1') { cellBg = 'bg-amber-50 text-amber-700 font-bold border-amber-200'; }
+                        else if (selection === '2') { cellBg = 'bg-slate-50 text-slate-600 font-bold border-slate-200'; }
+                        else if (selection === '3') { cellBg = 'bg-orange-50 text-orange-700 font-bold border-orange-200'; }
+                        else if (['DNF', 'DSQ', 'DNS'].includes(selection)) { cellBg = 'bg-red-50 text-red-500 border-red-100'; }
+                        else if (selection) { textColor = 'text-slate-900'; }
 
                         return (
                           <td key={race.id} className="px-1 py-2 align-middle text-center">
@@ -300,6 +286,7 @@ export default function F1Calculator() {
                                   appearance-none text-center cursor-pointer
                                   w-full h-8 rounded border text-xs font-medium p-0
                                   focus:outline-none focus:ring-1 focus:ring-blue-500
+                                  [text-align-last:center] /* Force centered text on iOS */
                                   ${selection ? 'border-transparent shadow-sm' : 'border-slate-200 bg-slate-50'}
                                   ${cellBg} ${!selection ? textColor : ''}
                                 `}
@@ -315,8 +302,8 @@ export default function F1Calculator() {
                         );
                       })}
 
-                      {/* Total Score */}
-                      <td className="px-2 py-2 align-middle text-right">
+                      {/* Total Score - Added padding-right */}
+                      <td className="px-1 pr-4 py-2 align-middle text-right">
                         <div className="flex flex-col items-end justify-center">
                           <span className={`text-base font-bold leading-none ${isWinner ? 'text-blue-700' : 'text-slate-800'}`}>
                             {driver.totalScore}
