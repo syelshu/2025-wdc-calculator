@@ -243,10 +243,13 @@ export default function F1Calculator() {
                               className="w-1 h-3 rounded-full shrink-0" 
                               style={{ backgroundColor: driver.color }}
                             />
-                            <span className="font-bold text-slate-800 truncate text-sm leading-none">
-                              {driver.shortName}
-                              {isWinner && <Crown className="inline w-3 h-3 ml-1 text-amber-500 fill-amber-500" />}
-                            </span>
+                            {/* Fixed: Removed truncate, used flex container for reliable layout */}
+                            <div className="flex items-center gap-1 min-w-0">
+                              <span className="font-bold text-slate-800 text-sm leading-none whitespace-nowrap">
+                                {driver.shortName}
+                              </span>
+                              {isWinner && <Crown className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />}
+                            </div>
                           </div>
 
                           {/* Stats Row (Read Only Text) */}
