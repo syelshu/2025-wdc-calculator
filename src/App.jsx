@@ -12,7 +12,16 @@ const POINTS_SPRINT = {
   1: 8, 2: 7, 3: 6, 4: 5, 5: 4, 6: 3, 7: 2, 8: 1
 };
 
-// 2025 Top 3 Contenders (Post Las Vegas GP - Nov 23, 2025)
+// Fixed Results for Completed Races (Qatar Sprint)
+const FIXED_RESULTS = {
+  qatar_sprint: {
+    pia: '1',
+    nor: '3',
+    ver: '4'
+  }
+};
+
+// 2025 Top 3 Contenders (Updated Post-Qatar Sprint)
 const INITIAL_DRIVERS = [
   { 
     id: 'nor', 
@@ -21,7 +30,7 @@ const INITIAL_DRIVERS = [
     shortName: 'NOR', 
     team: 'McLaren', 
     color: '#ff8000', 
-    points: 390,
+    points: 396, // 390 + 6 (P3 Sprint)
     gpWins: 7, 
     gpP2s: 8   
   },
@@ -32,7 +41,7 @@ const INITIAL_DRIVERS = [
     shortName: 'PIA',
     team: 'McLaren', 
     color: '#ff8000', 
-    points: 366, 
+    points: 374, // 366 + 8 (P1 Sprint)
     gpWins: 7, 
     gpP2s: 3
   },
@@ -43,40 +52,41 @@ const INITIAL_DRIVERS = [
     shortName: 'VER',
     team: 'Red Bull', 
     color: '#1e41ff', 
-    points: 366, 
+    points: 371, // 366 + 5 (P4 Sprint)
     gpWins: 6, 
     gpP2s: 5
   }
 ];
 
-// Remaining Races - Simplified Headers
+// Remaining Races - Simplified Headers for Mobile
+// Marked qatar_sprint as finished
 const RACES = [
-  { id: 'qatar_sprint', name: 'Qatar Sprint', type: 'SPRINT', header: 'QAT', sub: 'Spr', mobileHeader: 'QAT' },
-  { id: 'qatar_gp', name: 'Qatar GP', type: 'GP', header: 'QAT', sub: 'GP', mobileHeader: 'QAT' },
-  { id: 'abu_dhabi', name: 'Abu Dhabi GP', type: 'GP', header: 'ABU', sub: 'GP', mobileHeader: 'ABU' },
+  { id: 'qatar_sprint', name: 'Qatar Sprint', type: 'SPRINT', header: 'QAT', sub: 'Spr', mobileHeader: 'Q.S', isFinished: true },
+  { id: 'qatar_gp', name: 'Qatar GP', type: 'GP', header: 'QAT', sub: 'GP', mobileHeader: 'Q.G', isFinished: false },
+  { id: 'abu_dhabi', name: 'Abu Dhabi GP', type: 'GP', header: 'ABU', sub: 'GP', mobileHeader: 'A.D', isFinished: false },
 ];
 
 const POSITION_OPTIONS = [
-  { value: '1', label: 'P1' },
-  { value: '2', label: 'P2' },
-  { value: '3', label: 'P3' },
-  { value: '4', label: 'P4' },
-  { value: '5', label: 'P5' },
-  { value: '6', label: 'P6' },
-  { value: '7', label: 'P7' },
-  { value: '8', label: 'P8' },
-  { value: '9', label: 'P9' },
-  { value: '10', label: 'P10' },
-  { value: '11', label: 'P11' },
-  { value: '12', label: 'P12' },
-  { value: '13', label: 'P13' },
-  { value: '14', label: 'P14' },
-  { value: '15', label: 'P15' },
-  { value: '16', label: 'P16' },
-  { value: '17', label: 'P17' },
-  { value: '18', label: 'P18' },
-  { value: '19', label: 'P19' },
-  { value: '20', label: 'P20' },
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
+  { value: '3', label: '3' },
+  { value: '4', label: '4' },
+  { value: '5', label: '5' },
+  { value: '6', label: '6' },
+  { value: '7', label: '7' },
+  { value: '8', label: '8' },
+  { value: '9', label: '9' },
+  { value: '10', label: '10' },
+  { value: '11', label: '11' },
+  { value: '12', label: '12' },
+  { value: '13', label: '13' },
+  { value: '14', label: '14' },
+  { value: '15', label: '15' },
+  { value: '16', label: '16' },
+  { value: '17', label: '17' },
+  { value: '18', label: '18' },
+  { value: '19', label: '19' },
+  { value: '20', label: '20' },
   { value: 'DNF', label: 'DNF' },
   { value: 'DSQ', label: 'DSQ' },
   { value: 'DNS', label: 'DNS' },
@@ -89,7 +99,7 @@ export default function F1Calculator() {
 
   // Reset all predictions
   const handleReset = () => {
-    if (window.confirm('重置所有预测？')) {
+    if (window.confirm('确定要重置所有预测吗？')) {
       setPredictions({});
       setDrivers(INITIAL_DRIVERS);
     }
@@ -106,6 +116,7 @@ export default function F1Calculator() {
     }));
   };
 
+  // Check if position is used in a specific race column
   const getUsedPositions = (raceId) => {
     const used = new Set();
     Object.values(predictions).forEach(driverPreds => {
@@ -125,6 +136,9 @@ export default function F1Calculator() {
       let newP2s = 0;
       
       RACES.forEach(race => {
+        // If race is finished, points are already in 'driver.points', so skip calc
+        if (race.isFinished) return;
+
         const pred = predictions[driver.id]?.[race.id];
         if (pred && pred !== 'DNF' && pred !== 'DSQ' && pred !== 'DNS') {
           const pos = parseInt(pred);
@@ -147,6 +161,7 @@ export default function F1Calculator() {
       };
     });
 
+    // Automatic Sort Logic with Tie-Breaker
     const sorted = [...processed].sort((a, b) => {
       if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
       if (b.projectedWins !== a.projectedWins) return b.projectedWins - a.projectedWins;
@@ -211,7 +226,7 @@ export default function F1Calculator() {
                     </th>
                   ))}
 
-                  {/* Total - Added padding-right to move it left */}
+                  {/* Total */}
                   <th className="px-1 pr-4 py-3 text-right w-[17%] font-bold text-slate-800">
                     总分
                   </th>
@@ -243,7 +258,7 @@ export default function F1Calculator() {
                               className="w-1 h-3 rounded-full shrink-0" 
                               style={{ backgroundColor: driver.color }}
                             />
-                            {/* Flex container for name + crown */}
+                            {/* Flex container for name + crown to prevent truncation */}
                             <div className="flex items-center gap-1 min-w-0">
                               <span className="font-bold text-slate-800 text-sm leading-none whitespace-nowrap">
                                 {driver.shortName}
@@ -252,7 +267,7 @@ export default function F1Calculator() {
                             </div>
                           </div>
 
-                          {/* Stats Row */}
+                          {/* Stats Row (Read Only Text) */}
                           <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
                             <span className="font-medium text-slate-600">{driver.points} 分</span>
                             <span className="text-slate-300">|</span>
@@ -261,15 +276,36 @@ export default function F1Calculator() {
                         </div>
                       </td>
 
-                      {/* Race Dropdowns */}
+                      {/* Race Dropdowns / Static Results */}
                       {RACES.map(race => {
+                        // Check if race is finished
+                        if (race.isFinished) {
+                          const result = FIXED_RESULTS[race.id]?.[driver.id] || '-';
+                          let resultBg = 'bg-slate-50 text-slate-400'; // Default
+                          if (result === '1') resultBg = 'bg-yellow-100 text-yellow-800 border-yellow-200 font-bold';
+                          if (result === '2') resultBg = 'bg-slate-100 text-slate-700 border-slate-200 font-bold';
+                          if (result === '3') resultBg = 'bg-orange-100 text-orange-800 border-orange-200 font-bold';
+                          if (['4','5','6','7','8'].includes(result)) resultBg = 'bg-green-50 text-green-700 border-green-100 font-medium';
+
+                          return (
+                            <td key={race.id} className="px-1 py-2 align-middle text-center">
+                              <div className={`
+                                flex items-center justify-center w-full h-8 rounded border text-xs
+                                ${resultBg} border-opacity-50
+                              `}>
+                                P{result}
+                              </div>
+                            </td>
+                          );
+                        }
+
+                        // --- Interactive Dropdowns for Future Races ---
                         const selection = predictions[driver.id]?.[race.id] || '';
                         const usedPositions = getUsedPositions(race.id);
 
                         let cellBg = '';
                         let textColor = 'text-slate-400';
                         
-                        // Color Scheme
                         if (selection === '1') { cellBg = 'bg-amber-50 text-amber-700 font-bold border-amber-200'; }
                         else if (selection === '2') { cellBg = 'bg-slate-50 text-slate-600 font-bold border-slate-200'; }
                         else if (selection === '3') { cellBg = 'bg-orange-50 text-orange-700 font-bold border-orange-200'; }
@@ -286,7 +322,7 @@ export default function F1Calculator() {
                                   appearance-none text-center cursor-pointer
                                   w-full h-8 rounded border text-xs font-medium p-0
                                   focus:outline-none focus:ring-1 focus:ring-blue-500
-                                  [text-align-last:center] /* Force centered text on iOS */
+                                  [text-align-last:center]
                                   ${selection ? 'border-transparent shadow-sm' : 'border-slate-200 bg-slate-50'}
                                   ${cellBg} ${!selection ? textColor : ''}
                                 `}
@@ -302,7 +338,7 @@ export default function F1Calculator() {
                         );
                       })}
 
-                      {/* Total Score - Added padding-right */}
+                      {/* Total Score */}
                       <td className="px-1 pr-4 py-2 align-middle text-right">
                         <div className="flex flex-col items-end justify-center">
                           <span className={`text-base font-bold leading-none ${isWinner ? 'text-blue-700' : 'text-slate-800'}`}>
@@ -317,7 +353,7 @@ export default function F1Calculator() {
                                 </span>
                               )}
                               <span className="text-[9px] text-slate-400 leading-none">
-                                {driver.projectedWins}胜
+                                {driver.projectedWins} 胜
                               </span>
                             </div>
                           )}
